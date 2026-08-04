@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة النشر | ARN News</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #bb1919;
+            --dark-color: #141414;
+            --light-bg: #f4f6f9;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans Arabic', Tahoma, sans-serif; }
+        body { background-color: var(--light-bg); color: #222; }
+
+        header {
+            background-color: var(--dark-color);
+            color: #fff;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-brand { display: flex; align-items: center; gap: 10px; }
+        .brand-mark { background: var(--primary-color); font-weight: 800; padding: 5px 9px; font-size: 15px; letter-spacing: .5px; }
+        .header-brand h2 { font-size: 16px; font-weight: 700; color: #d8d8d8; }
+
+        .header-btn {
+            background: var(--primary-color);
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 13.5px;
+        }
+
+        .container { max-width: 900px; margin: 30px auto; padding: 0 15px; }
+
+        .card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            border-right: 4px solid var(--primary-color);
+            padding-right: 10px;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: 2px solid var(--primary-color); }
+        .form-group textarea { height: 100px; }
+        .form-hint { font-size: 12px; color: #888; margin-top: 4px; }
+
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .link-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .link-row input { flex: 1; }
+        .icon-btn { flex-shrink: 0; width: 38px; border: 1px solid #ccc; border-radius: 4px; background: #fff; font-size: 15px; cursor: pointer; }
+        .icon-btn:hover { background: #f1f1f1; }
+        .add-link-btn {
+            font-size: 13px; font-weight: bold; color: var(--primary-color); border: 1px dashed var(--primary-color);
+            padding: 7px 12px; background: #fff; border-radius: 4px; cursor: pointer;
+        }
+        .add-link-btn:hover { background: #fdf1f1; }
+        .video-preview { font-size: 12px; color: #888; margin-top: 4px; }
+
+        .btn-submit {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+        .news-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            gap: 10px;
+        }
+        .news-item div { font-size: 13.5px; }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* Login Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        .modal-box input {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .modal-box button {
+            width: 100%;
+            padding: 10px;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Auth Lock Screen -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal-box">
+            <h3>تسجيل دخول الناشر 🔒</h3>
+            <p style="font-size:12px; color:#666; margin-top:5px;">كلمة السر الحالية: <b>admin123</b></p>
+            <input type="password" id="admin-pass" placeholder="أدخل كلمة السر">
+            <button onclick="checkPassword()">دخول للوحة</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-brand">
+            <span class="brand-mark">ARN</span>
+            <h2>لوحة إدارة الأخبار</h2>
+        </div>
+        <a href="news.html" class="header-btn">عرض موقع الأخبار 🌐</a>
+    </header>
+
+    <div class="container" id="admin-content" style="display:none;">
+
+        <!-- GitHub Connection -->
+        <div class="card" id="github-card">
+            <h2>الاتصال بـ GitHub 🔗</h2>
+            <p style="font-size:13px;color:#666;margin-bottom:15px;">
+                التوكن بيتحط هنا مؤقتًا في الذاكرة بس، ومش بيتحفظ في أي ملف ولا هيتضاف لما ترفع الكود.
+                لما تقفل الصفحة أو تعمل ريفريش، هيتمسح ولازم تدخله تاني.
+            </p>
+            <div class="form-group">
+                <label>اسم الريبو (owner/repo):</label>
+                <input type="text" id="gh-repo" placeholder="مثال: mahmoud/news-site">
+            </div>
+            <div class="form-group">
+                <label>الفرع (Branch):</label>
+                <input type="text" id="gh-branch" value="main">
+            </div>
+            <div class="form-group">
+                <label>GitHub Token:</label>
+                <input type="password" id="gh-token" placeholder="ghp_... أو github_pat_...">
+            </div>
+            <button type="button" class="btn-submit" style="background:#24292f;" onclick="connectGithub()">اتصال ✅</button>
+            <p id="gh-status" style="font-size:13px;margin-top:10px;font-weight:bold;"></p>
+        </div>
+
+        <!-- Form -->
+        <div class="card" id="publish-card" style="display:none;">
+            <h2>نشر خبر جديد</h2>
+            <form onsubmit="addNews(event)">
+                <div class="form-group">
+                    <label>العنوان الرئيسي:</label>
+                    <input type="text" id="title" required placeholder="عنوان الخبر الرئيسي">
+                </div>
+                <div class="form-group">
+                    <label>العنوان الفرعي:</label>
+                    <input type="text" id="subtitle" placeholder="جملة موجزة تلخص الخبر (تظهر تحت العنوان الرئيسي)">
+                </div>
+                <div class="row2">
+                    <div class="form-group">
+                        <label>القسم:</label>
+                        <select id="category">
+                            <option value="تكنولوجيا">تكنولوجيا</option>
+                            <option value="اقتصاد">اقتصاد</option>
+                            <option value="رياضة">رياضة</option>
+                            <option value="ثقافة">ثقافة</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>رابط الصورة:</label>
+                        <input type="url" id="image" required placeholder="https://images.unsplash.com/...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>تفاصيل الخبر:</label>
+                    <textarea id="details" required placeholder="اكتب تفاصيل الخبر الكاملة... افصل بين الفقرات بسطر جديد."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>رابط فيديو (YouTube) — اختياري:</label>
+                    <input type="url" id="video" placeholder="https://www.youtube.com/watch?v=..." oninput="previewVideo()">
+                    <div class="video-preview" id="video-preview"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>روابط ذات صلة — اختياري:</label>
+                    <div id="links-container"></div>
+                    <button type="button" class="add-link-btn" onclick="addLinkRow()">+ إضافة رابط</button>
+                </div>
+
+                <button type="submit" class="btn-submit">نشر الخبر الآن 🚀</button>
+            </form>
+        </div>
+
+        <!-- Manage Published News -->
+        <div class="card" id="manage-card" style="display:none;">
+            <h2>الأخبار المنشورة حالياً</h2>
+            <div id="news-list">جاري التحميل...</div>
+        </div>
+    </div>
+
+    <script>
+        // SHA-256 Hash for "admin123"
+        const SECRET_HASH = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9";
+
+        const defaultNews = [
+            { id: 1, title: "إطلاق أحدث تقنيات الذكاء الاصطناعي", subtitle: "", category: "تكنولوجيا", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500", details: "أعلنت كبرى الشركات التكنولوجية اليوم عن إطلاق نموذج جديد...", date: "4 أغسطس 2026", links: [], video: null },
+            { id: 2, title: "ارتفاع مؤشرات الأسواق العالمية اليوم", subtitle: "", category: "اقتصاد", image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=500", details: "شهدت الأسواق المالية نشاطاً ملحوظاً مع صعود الأسهم...", date: "4 أغسطس 2026", links: [], video: null }
+        ];
+
+        async function hashString(str) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function checkPassword() {
+            const input = document.getElementById('admin-pass').value;
+            const hash = await hashString(input);
+            if (hash === SECRET_HASH) {
+                document.getElementById('auth-modal').style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
+                loadAdminNews();
+            } else {
+                alert('كلمة السر غير صحيحة!');
+            }
+        }
+
+        // ---- GitHub connection state (kept only in memory, never saved) ----
+        let ghRepo = '';
+        let ghBranch = 'main';
+        let ghToken = '';
+        const DATA_FILE = 'news-data.json';
+
+        function utf8ToBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+        function base64ToUtf8(str) {
+            return decodeURIComponent(escape(atob(str)));
+        }
+
+        async function githubApi(path, options = {}) {
+            const url = path
+                ? `https://api.github.com/repos/${ghRepo}/${path}`
+                : `https://api.github.com/repos/${ghRepo}`;
+            const res = await fetch(url, {
+                ...options,
+                headers: {
+                    'Authorization': `Bearer ${ghToken}`,
+                    'Accept': 'application/vnd.github+json',
+                    ...(options.headers || {})
+                }
+            });
+            return res;
+        }
+
+        // Returns { news, sha } — sha is null if the file doesn't exist yet
+        async function getRepoNews() {
+            const res = await githubApi(`contents/${DATA_FILE}?ref=${encodeURIComponent(ghBranch)}`);
+            if (res.status === 404) {
+                return { news: defaultNews, sha: null };
+            }
+            if (!res.ok) {
+                throw new Error(`تعذر قراءة الملف من GitHub (${res.status})`);
+            }
+            const data = await res.json();
+            const news = JSON.parse(base64ToUtf8(data.content));
+            return { news, sha: data.sha };
+        }
+
+        async function commitNews(newsArray, message) {
+            // Always fetch the latest sha right before committing to avoid conflicts
+            const { sha } = await getRepoNews();
+            const body = {
+                message,
+                content: utf8ToBase64(JSON.stringify(newsArray, null, 2)),
+                branch: ghBranch
+            };
+            if (sha) body.sha = sha;
+
+            const res = await githubApi(`contents/${DATA_FILE}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || `فشل الحفظ على GitHub (${res.status})`);
+            }
+        }
+
+        async function connectGithub() {
+            ghRepo = document.getElementById('gh-repo').value.trim();
+            ghBranch = document.getElementById('gh-branch').value.trim() || 'main';
+            ghToken = document.getElementById('gh-token').value.trim();
+            const statusEl = document.getElementById('gh-status');
+
+            if (!ghRepo || !ghToken) {
+                statusEl.style.color = '#dc3545';
+                statusEl.textContent = 'من فضلك أدخل اسم الريبو والتوكن.';
+                return;
+            }
+
+            statusEl.style.color = '#666';
+            statusEl.textContent = 'جاري التحقق من الاتصال...';
+
+            try {
+                const res = await githubApi('');
+                if (!res.ok) throw new Error(`تعذر الوصول للريبو (${res.status}) — تأكد من الاسم والتوكن والصلاحيات`);
+                statusEl.style.color = '#28a745';
+                statusEl.textContent = 'تم الاتصال بنجاح ✅';
+                document.getElementById('publish-card').style.display = 'block';
+                document.getElementById('manage-card').style.display = 'block';
+                await loadAdminNews();
+            } catch (err) {
+                statusEl.style.color = '#dc3545';
+                statusEl.textContent = err.message;
+            }
+        }
+
+        async function loadAdminNews() {
+            const listContainer = document.getElementById('news-list');
+            listContainer.innerHTML = 'جاري التحميل...';
+            try {
+                const { news } = await getRepoNews();
+                listContainer.innerHTML = '';
+                news.forEach(item => {
+                    listContainer.innerHTML += `
+                        <div class="news-item">
+                            <div>
+                                <strong>[${item.category}]</strong> ${item.title}
+                                ${item.video ? ' 🎬' : ''}${(item.links && item.links.length) ? ' 🔗' : ''}
+                            </div>
+                            <button class="btn-delete" onclick="deleteNews(${item.id})">حذف 🗑️</button>
+                        </div>
+                    `;
+                });
+                if (!news.length) listContainer.innerHTML = '<p style="color:#888;">لا توجد أخبار منشورة بعد.</p>';
+            } catch (err) {
+                listContainer.innerHTML = `<p style="color:#dc3545;">${err.message}</p>`;
+            }
+        }
+
+        // ---- Links & video helpers ----
+        let linkCount = 0;
+        function addLinkRow(label = '', url = '') {
+            linkCount++;
+            const id = linkCount;
+            const container = document.getElementById('links-container');
+            const row = document.createElement('div');
+            row.className = 'link-row';
+            row.id = 'link-row-' + id;
+            row.innerHTML = `
+                <input type="text" placeholder="عنوان الرابط" value="${(label||'').replace(/"/g,'&quot;')}" data-role="label">
+                <input type="url" placeholder="https://..." value="${(url||'').replace(/"/g,'&quot;')}" data-role="url">
+                <button type="button" class="icon-btn" onclick="document.getElementById('link-row-${id}').remove()">✕</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function getLinks() {
+            return [...document.querySelectorAll('.link-row')].map(row => ({
+                label: row.querySelector('[data-role="label"]').value.trim(),
+                url: row.querySelector('[data-role="url"]').value.trim()
+            })).filter(l => l.label && l.url);
+        }
+
+        function youtubeEmbed(url) {
+            if (!url) return null;
+            let id = null;
+            const m1 = url.match(/[?&]v=([^&]+)/);
+            const m2 = url.match(/youtu\.be\/([^?&]+)/);
+            const m3 = url.match(/youtube\.com\/embed\/([^?&]+)/);
+            if (m1) id = m1[1]; else if (m2) id = m2[1]; else if (m3) id = m3[1];
+            return id ? `https://www.youtube.com/embed/${id}` : null;
+        }
+
+        function previewVideo() {
+            const url = document.getElementById('video').value.trim();
+            const embed = youtubeEmbed(url);
+            document.getElementById('video-preview').textContent = url
+                ? (embed ? '✓ تم التعرف على رابط الفيديو بنجاح' : '⚠ تعذّر التعرف على رابط YouTube — تأكد من الرابط')
+                : '';
+        }
+
+        async function addNews(e) {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري النشر...';
+
+            try {
+                const { news } = await getRepoNews();
+                const newItem = {
+                    id: Date.now(),
+                    title: document.getElementById('title').value,
+                    subtitle: document.getElementById('subtitle').value,
+                    category: document.getElementById('category').value,
+                    image: document.getElementById('image').value,
+                    details: document.getElementById('details').value,
+                    date: new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }),
+                    links: getLinks(),
+                    video: youtubeEmbed(document.getElementById('video').value.trim())
+                };
+                news.unshift(newItem);
+                await commitNews(news, `نشر خبر: ${newItem.title}`);
+                e.target.reset();
+                document.getElementById('links-container').innerHTML = '';
+                document.getElementById('video-preview').textContent = '';
+                await loadAdminNews();
+                alert('تم نشر الخبر بنجاح! هيظهر عند كل الزوار بعد نشر GitHub Pages (ممكن ياخد دقيقة).');
+            } catch (err) {
+                alert('حصل خطأ: ' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'نشر الخبر الآن 🚀';
+            }
+        }
+
+        async function deleteNews(id) {
+            try {
+                const { news } = await getRepoNews();
+                const updated = news.filter(item => item.id !== id);
+                await commitNews(updated, `حذف خبر رقم ${id}`);
+                await loadAdminNews();
+            } catch (err) {
+                alert('حصل خطأ أثناء الحذف: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>
