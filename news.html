@@ -466,7 +466,7 @@ function renderArticleFromHash(){
   const m = location.hash.match(/^#\/article\/(\d+)/);
   if(!m){ showHome(); return; }
   const id = parseInt(m[1],10);
-  const n = newsData.find(x=>x.id===id);
+  const n = newsData.find(x=>Number(x.id)===id);
   if(!n){ showHome(); return; }
 
   document.getElementById("home-view").style.display = "none";
